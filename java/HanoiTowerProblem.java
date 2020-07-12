@@ -1,9 +1,11 @@
-import java.util.Arrays;
 import java.util.Stack;
 
 public class HanoiTowerProblem {
+
     static Stack<Integer> A = new Stack<Integer>() {
         {
+            add(5);
+            add(4);
             add(3);
             add(2);
             add(1);
@@ -12,85 +14,106 @@ public class HanoiTowerProblem {
             B = new Stack<>(),
             C = new Stack<>();
 
+    static int DISKS = A.size();
+
     public static void main(String[] args) {
-        solveHanoi1(A.size(), A, C, B);
-        solveHanoi(3, 'A', 'C', 'B');
+        solveHanoi(A.size(), A, B, C);
     }
 
-    static int cnt = 0;
+    private static void solveHanoi(int disk, Stack<Integer> from, Stack<Integer> to, Stack<Integer> aux) {
+        if (disk > 0) {
+            solveHanoi(disk - 1, from, aux, to);
+            aux.push(from.pop());
+            printTower();
+            solveHanoi(disk - 1, to, from, aux);
+        }
 
-    private static void solveHanoi1(int disk, Stack<Integer> from, Stack<Integer> to, Stack<Integer> aux) {
-        if (cnt++ > 10) {
-//            return;
-        }
-        printTower("- ");
-        if (disk == 1) {
-            return;
-        }
-        to.add(from.pop());
-        solveHanoi1(disk - 1, from, aux, to);
-        printTower("(1)");
-        aux.add(from.pop());
-        printTower("(2)");
-        solveHanoi1(disk - 1, aux, to, from);
     }
 
-    private static void solveHanoi(int diskId, char from, char to, char aux) {
-//        System.out.println("- " + diskId + "  from : " + from + " to: " + to + "  aux : " + aux);
-        if (diskId == 1) {
-            System.out.println("disk 1 is moved " + from + " to " + to);
-            return;
-        }
-        solveHanoi(diskId - 1, from, aux, to);
-
-        System.out.println("disk " + diskId + " is moved " + from + " to " + to);
-        solveHanoi(diskId - 1, aux, to, from);
-    }
-
-    static void printTower(String s) {
-        System.out.print(s);
-        printTower(A, "A");
-        printTower(B, "B");
-        printTower(C,  "C");
+    static int printCnt = 0;
+    static void printTower() {
+        char[][] m1 = constructMatrix(A);
+        char[][] m2 = constructMatrix(B);
+        char[][] m3 = constructMatrix(C);
+        char[][] con1 = converge(m1, m2, m3);
+        System.out.println(++printCnt);
+        printMatrix(con1);
         System.out.println();
     }
 
-    static void printTower(Stack s, String v) {
-        System.out.print(v + ": [");
-        for (int i = s.size() - 1; i >= 0; i--) {
-            System.out.print(" " + s.get(i) + " ");
-        }
-        System.out.print("], ");
-    }
+    static char[][] converge(char[][] m1, char[][] m2, char[][] m3) {
+        int m1C = m1[0].length;
+        int m2C = m2[0].length;
+        int m3C = m3[0].length;
+        char[][] newM = new char[m1.length][m1C + m2C + m3C];
 
-    private static void printTower1() {
-        StringBuilder sb = new StringBuilder();
-        int towerCnt = 3;
-
-        String[][] matrix = new String[4][12];
-
-        for (String[] arr : matrix) {
-            Arrays.fill(arr, " - ");
-        }
-
-        for (String[] arr : matrix) {
-            System.out.println(Arrays.toString(arr));
-        }
-
-        for (int t = 0; t < towerCnt; t++) {
-
-            for (int i = 0; i < 3; i++) {
-                for (int s = 0; s < 3 - i; s++) {
-                    sb.append("  ");
-                }
-                for (int j = 0; j <= i; j++) {
-                    sb.append(" || ");
-                }
-                sb.append("\n");
+        for (int i = 0; i < m1.length; i++) {
+            for (int j = 0; j < m1[i].length; j++) {
+                newM[i][j] = m1[i][j];
             }
         }
-//        return sb.toString();
-//        System.out.println(sb.toString());
+
+        int startPos = m1C;
+
+        for (int i = 0; i < m2.length; i++) {
+            for (int j = 0; j < m2[i].length; j++) {
+                newM[i][j + startPos] = m2[i][j];
+            }
+        }
+
+        startPos = startPos + m2C;
+
+        for (int i = 0; i < m3.length; i++) {
+            for (int j = 0; j < m3[i].length; j++) {
+                newM[i][j + startPos] = m3[i][j];
+            }
+        }
+
+        return newM;
     }
 
+    static char[][] constructMatrix(Stack<Integer> stack) {
+        int DS = (DISKS) + ((DISKS) - 1);
+        char[][] matrix = new char[DISKS][DS];
+
+        Stack<Integer> AA = (Stack<Integer>) stack.clone();
+
+        int startRow = DISKS - AA.size();
+
+        for (int i = 0; i < matrix.length; i++) {
+            if (i < startRow) {
+                continue;
+            }
+            int diskCnt = AA.pop();
+            int inc = diskCnt == 1 ? 1 : 2;
+            int reach = 0;
+            for (int j = DISKS - diskCnt; j < DS; j = j + inc) {
+                matrix[i][j] = '|';
+                if (++reach == diskCnt) {
+                    break;
+                }
+            }
+        }
+        return matrix;
+    }
+
+    static void printMatrix(char[][] matrix) {
+        int split = DISKS + DISKS - 1;
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                if (j % split == 0) {
+                    System.out.print("\t");
+                }
+                Character c = matrix[i][j];
+                if (c == '\0') {
+                    c = ' ';
+                }
+                if (c == '|') {
+                    c = '*';
+                }
+                System.out.print(c + " ");
+            }
+            System.out.println();
+        }
+    }
 }
