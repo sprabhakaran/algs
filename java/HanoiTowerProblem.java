@@ -4,8 +4,8 @@ public class HanoiTowerProblem {
 
     static Stack<Integer> A = new Stack<Integer>() {
         {
-            add(5);
-            add(4);
+//            add(5);
+//            add(4);
             add(3);
             add(2);
             add(1);
@@ -17,6 +17,7 @@ public class HanoiTowerProblem {
     static int DISKS = A.size();
 
     public static void main(String[] args) {
+        printTower();
         solveHanoi(A.size(), A, B, C);
     }
 
@@ -117,3 +118,47 @@ public class HanoiTowerProblem {
         }
     }
 }
+
+/*
+
+1
+	    *
+	  *   *
+	*   *   *
+
+2
+
+	  *   *
+	*   *   * 	          	    *
+
+3
+
+
+	*   *   * 	  *   *   	    *
+
+4
+
+	          	    *
+	*   *   * 	  *   *
+
+5
+
+	          	    *
+	          	  *   *   	*   *   *
+
+6
+
+
+	    *     	  *   *   	*   *   *
+
+7
+
+	          	          	  *   *
+	    *     	          	*   *   *
+
+8
+	          	          	    *
+	          	          	  *   *
+	          	          	*   *   * 
+
+ */
